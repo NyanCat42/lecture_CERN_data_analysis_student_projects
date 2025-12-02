@@ -1,1 +1,1 @@
-this is where my project will be
+# VESC equiped electric bicycle data log analysis tool
