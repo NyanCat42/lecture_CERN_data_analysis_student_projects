@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Script to parse menu text and extract items with prices into CSV format
-"""
-
 import re
 import csv
 from pathlib import Path
@@ -107,6 +102,7 @@ def parse_menu_text(input_file, output_file):
     return menu_items
 
 
+# This block only runs when the script is executed directly
 if __name__ == "__main__":
     # Set up paths
     script_dir = Path(__file__).parent
@@ -119,15 +115,3 @@ if __name__ == "__main__":
     
     # Parse menu
     items = parse_menu_text(input_file, output_file)
-    
-    # Display first few items
-    print("\n--- First 10 items ---")
-    for i, item in enumerate(items[:10], 1):
-        print(f"{i}. {item['item_name']}: €{item['base_price']}", end="")
-        if item['small_combo_price']:
-            print(f" (small combo: €{item['small_combo_price']}", end="")
-            if item['large_combo_price']:
-                print(f", large combo: €{item['large_combo_price']})", end="")
-            else:
-                print(")", end="")
-        print()

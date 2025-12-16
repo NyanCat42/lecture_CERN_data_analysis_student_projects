@@ -1,5 +1,5 @@
 import easyocr
-import fitz  # PyMuPDF
+import fitz
 from pathlib import Path
 from PIL import Image
 import numpy as np
@@ -7,13 +7,9 @@ import io
 
 
 def extract_text_from_pdf(pdf_path, output_path):
-    """
-    Extract text from PDF using EasyOCR
+
+    #Extract text from PDF using EasyOCR
     
-    Args:
-        pdf_path: Path to the PDF file
-        output_path: Path to save the extracted text
-    """
     print(f"Processing: {pdf_path}")
     
     # Initialize EasyOCR reader (first time will download the model)
@@ -56,6 +52,7 @@ def extract_text_from_pdf(pdf_path, output_path):
     return full_text
 
 
+# This block only runs when the script is executed directly
 if __name__ == "__main__":
     # Set up paths
     script_dir = Path(__file__).parent

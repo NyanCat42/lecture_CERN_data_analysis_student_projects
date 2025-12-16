@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Script to scrape nutritional information from Hesburger website.
-Extracts kcal, fats, carbohydrates, proteins, etc. for each menu item.
-"""
-
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -234,5 +228,6 @@ def main():
         raise
 
 
+# This block only runs when the script is executed directly
 if __name__ == "__main__":
     main()

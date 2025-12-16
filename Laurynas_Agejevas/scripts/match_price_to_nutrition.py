@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Script to match menu prices with nutritional information.
-Handles combo meals by adding nutritional values of components.
-"""
-
 import pandas as pd
 import numpy as np
 import os
@@ -75,10 +69,6 @@ def clean_name_for_display(name):
     
     # Remove numbers (including decimals like 2.30, 0.3, etc.)
     name = re.sub(r'\d+[\.,]?\d*', '', name)
-    
-    # Replace VEKE@ with VEKE
-    name = name.replace('VEKE@', 'VEKE')
-    name = name.replace('veke@', 'VEKE')
     
     # Replace multiple spaces with single space
     name = re.sub(r'\s+', ' ', name)
@@ -188,6 +178,10 @@ def match_price_to_nutrition(menu_path, nutrition_path, output_path):
         
         # Skip Kečupas completely
         if 'kečupas' in item_name.lower():
+            continue
+
+        # Skip Kečupas completely
+        if 'arbata' in item_name.lower():
             continue
         
         # Skip obvious non-food items
@@ -346,5 +340,6 @@ def main():
     match_price_to_nutrition(menu_path, nutrition_path, output_path)
 
 
+# This block only runs when the script is executed directly
 if __name__ == "__main__":
     main()
