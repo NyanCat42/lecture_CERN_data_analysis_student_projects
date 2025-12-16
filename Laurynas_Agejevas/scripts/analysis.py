@@ -162,7 +162,7 @@ def create_price_vs_calories_plot(df, output_dir):
     print("\nCreating price vs calories scatter plot...")
     
     # Set up the figure
-    fig, ax = plt.subplots(figsize=(24, 13.5))
+    fig, ax = plt.subplots(figsize=(16, 9))
     
     # Define colors for each item type
     colors = {
@@ -239,7 +239,7 @@ def create_price_vs_protein_plot(df, output_dir):
     print("\nCreating price vs protein scatter plot...")
     
     # Set up the figure
-    fig, ax = plt.subplots(figsize=(24, 13.5))
+    fig, ax = plt.subplots(figsize=(16, 9))
     
     # Define colors for each item type
     colors = {
@@ -389,144 +389,105 @@ def generate_markdown_summary(df, stats, output_dir):
     md.append(f"\n**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     md.append("\n---\n")
     
-    # Overview
-    md.append("## Overview")
-    md.append(f"- **Total items analyzed:** {stats['total_items']}")
-    md.append(f"- **Unique menu items:** {stats['unique_items']}")
-    md.append(f"- **Item types breakdown:**")
-    for item_type, count in stats['item_types'].items():
-        md.append(f"  - {item_type}: {count}")
+    # Recommendations Section
+    md.append("## 🎯 Recommendations for Daily Nutritional Goals")
     md.append("")
     
-    # Price Statistics
-    md.append("## Price Statistics")
-    md.append(f"- **Average price:** €{stats['avg_price']:.2f}")
-    md.append(f"- **Median price:** €{stats['median_price']:.2f}")
-    md.append(f"- **Price range:** €{stats['min_price']:.2f} - €{stats['max_price']:.2f}")
-    md.append(f"- **Standard deviation:** €{stats['std_price']:.2f}")
+    # Find best combinations for 2000 calories
+    md.append("### Reaching 2000 Calories per Day")
     md.append("")
     
-    # Nutritional Statistics
-    md.append("## Nutritional Statistics")
-    md.append("\n### Calories")
-    md.append(f"- **Average:** {stats['avg_calories']:.0f} kcal")
-    md.append(f"- **Median:** {stats['median_calories']:.0f} kcal")
-    md.append(f"- **Range:** {stats['min_calories']:.0f} - {stats['max_calories']:.0f} kcal")
+    # Find best value items for 2000 calories
+    target_calories = 2000
+    best_cal_combos = []
+    
+    # Try to find combinations
+    for idx1, row1 in df.iterrows():
+        for idx2, row2 in df.iterrows():
+            if idx1 >= idx2:
+                continue
+            total_cal = row1['energy_kcal'] + row2['energy_kcal']
+            total_price = row1['price'] + row2['price']
+            if 1900 <= total_cal <= 2100:
+                best_cal_combos.append({
+                    'items': f"{row1['item_name']} + {row2['item_name']}",
+                    'calories': total_cal,
+                    'protein': row1['proteins_g'] + row2['proteins_g'],
+                    'price': total_price
+                })
+    
+    # Sort by price
+    best_cal_combos = sorted(best_cal_combos, key=lambda x: x['price'])[:5]
+    
+    if best_cal_combos:
+        md.append("**Most cost-effective combinations to reach ~2000 kcal:**")
+        md.append("")
+        md.append("| Combination | Calories | Protein | Total Price |")
+        md.append("|-------------|----------|---------|-------------|")
+        for combo in best_cal_combos:
+            md.append(f"| {combo['items']} | {combo['calories']:.0f} kcal | {combo['protein']:.1f} g | €{combo['price']:.2f} |")
+        md.append("")
+    
+    # Find best combinations for 100g protein
+    md.append("### Reaching 100g of Protein per Day")
     md.append("")
     
-    md.append("### Protein")
-    md.append(f"- **Average:** {stats['avg_protein']:.1f} g")
-    md.append(f"- **Median:** {stats['median_protein']:.1f} g")
-    md.append(f"- **Range:** {stats['min_protein']:.1f} - {stats['max_protein']:.1f} g")
+    target_protein = 100
+    best_protein_combos = []
+    
+    for idx1, row1 in df.iterrows():
+        for idx2, row2 in df.iterrows():
+            if idx1 >= idx2:
+                continue
+            total_protein = row1['proteins_g'] + row2['proteins_g']
+            total_price = row1['price'] + row2['price']
+            total_cal = row1['energy_kcal'] + row2['energy_kcal']
+            if 90 <= total_protein <= 110:
+                best_protein_combos.append({
+                    'items': f"{row1['item_name']} + {row2['item_name']}",
+                    'protein': total_protein,
+                    'calories': total_cal,
+                    'price': total_price
+                })
+    
+    # Sort by price
+    best_protein_combos = sorted(best_protein_combos, key=lambda x: x['price'])[:5]
+    
+    if best_protein_combos:
+        md.append("**Most cost-effective combinations to reach ~100g protein:**")
+        md.append("")
+        md.append("| Combination | Protein | Calories | Total Price |")
+        md.append("|-------------|---------|----------|-------------|")
+        for combo in best_protein_combos:
+            md.append(f"| {combo['items']} | {combo['protein']:.1f} g | {combo['calories']:.0f} kcal | €{combo['price']:.2f} |")
+        md.append("")
+    
+    # Single item recommendations
+    md.append("### High-Protein Single Items")
+    md.append("")
+    md.append("**Best protein sources (sorted by price per gram of protein):**")
+    df_protein = df[df['proteins_g'] > 20].copy()
+    df_protein['price_per_g_protein'] = df_protein['price'] / df_protein['proteins_g']
+    df_protein = df_protein.nsmallest(5, 'price_per_g_protein')
+    md.append("")
+    md.append("| Item | Protein | Price | €/g protein |")
+    md.append("|------|---------|-------|-------------|")
+    for _, row in df_protein.iterrows():
+        md.append(f"| {row['item_name']} ({row['item_type']}) | {row['proteins_g']:.1f} g | €{row['price']:.2f} | €{row['price_per_g_protein']:.3f} |")
     md.append("")
     
-    md.append("### Fats")
-    md.append(f"- **Average:** {stats['avg_fat']:.1f} g")
-    md.append(f"- **Median:** {stats['median_fat']:.1f} g")
-    md.append("")
+    md.append("---\n")
     
-    md.append("### Carbohydrates")
-    md.append(f"- **Average:** {stats['avg_carbs']:.1f} g")
-    md.append(f"- **Median:** {stats['median_carbs']:.1f} g")
-    md.append("")
-    
-    # Price Efficiency
-    md.append("## Price Efficiency")
-    md.append(f"- **Average price per 100 kcal:** €{stats['avg_price_per_100kcal']:.2f}")
-    md.append(f"- **Best value item:** {stats['best_value_item']} (€{stats['best_value_price_per_100kcal']:.2f} per 100 kcal)")
-    md.append("")
-    
-    # Correlations
-    md.append("## Correlations with Price")
-    md.append(f"- **Calories:** {stats['price_calories_corr']:.3f}")
-    md.append(f"- **Protein:** {stats['price_protein_corr']:.3f}")
-    md.append(f"- **Fat:** {stats['price_fat_corr']:.3f}")
-    md.append(f"- **Carbohydrates:** {stats['price_carbs_corr']:.3f}")
-    md.append("")
-    md.append("*Note: Values range from -1 (negative correlation) to +1 (positive correlation)*")
-    md.append("")
-    
-    # Most Expensive Items
-    md.append("## Most Expensive Items")
-    md.append("| Rank | Item Name | Type | Price |")
-    md.append("|------|-----------|------|-------|")
-    for i, item in enumerate(stats['most_expensive'], 1):
-        md.append(f"| {i} | {item['item_name']} | {item['item_type']} | €{item['price']:.2f} |")
-    md.append("")
-    
-    # Cheapest Items
-    md.append("## Cheapest Items")
-    md.append("| Rank | Item Name | Type | Price |")
-    md.append("|------|-----------|------|-------|")
-    for i, item in enumerate(stats['cheapest'], 1):
-        md.append(f"| {i} | {item['item_name']} | {item['item_type']} | €{item['price']:.2f} |")
-    md.append("")
-    
-    # Highest Calorie Items
-    md.append("## Highest Calorie Items")
-    md.append("| Rank | Item Name | Type | Calories |")
-    md.append("|------|-----------|------|----------|")
-    for i, item in enumerate(stats['highest_calories'], 1):
-        md.append(f"| {i} | {item['item_name']} | {item['item_type']} | {item['energy_kcal']:.0f} kcal |")
-    md.append("")
-    
-    # Highest Protein Items
-    md.append("## Highest Protein Items")
-    md.append("| Rank | Item Name | Type | Protein |")
-    md.append("|------|-----------|------|---------|")
-    for i, item in enumerate(stats['highest_protein'], 1):
-        md.append(f"| {i} | {item['item_name']} | {item['item_type']} | {item['proteins_g']:.1f} g |")
-    md.append("")
-    
-    # Best Value Items
-    md.append("## Best Value Items (Price per 100 kcal)")
-    md.append("| Rank | Item Name | Type | Price | Calories | €/100kcal |")
-    md.append("|------|-----------|------|-------|----------|-----------|")
-    for i, item in enumerate(stats['best_value'], 1):
-        md.append(f"| {i} | {item['item_name']} | {item['item_type']} | €{item['price']:.2f} | {item['energy_kcal']:.0f} kcal | €{item['price_per_100kcal']:.2f} |")
-    md.append("")
-    
-    # Key Findings
-    md.append("## Key Findings")
+    # Visualization Section
+    md.append("## 📊 Data Visualizations")
     md.append("")
     md.append("### Price vs Calories")
-    md.append(f"- There is a **{'strong' if abs(stats['price_calories_corr']) > 0.7 else 'moderate' if abs(stats['price_calories_corr']) > 0.4 else 'weak'} positive correlation** (r={stats['price_calories_corr']:.3f}) between price and calorie content.")
-    md.append(f"- Higher-priced items generally contain more calories, as expected.")
-    md.append(f"- See the scatter plot: ![Price vs Calories](price_vs_calories.png)")
+    md.append("![Price vs Calories](price_vs_calories.png)")
     md.append("")
-    
     md.append("### Price vs Protein")
-    md.append(f"- There is a **{'strong' if abs(stats['price_protein_corr']) > 0.7 else 'moderate' if abs(stats['price_protein_corr']) > 0.4 else 'weak'} positive correlation** (r={stats['price_protein_corr']:.3f}) between price and protein content.")
-    md.append(f"- Protein-rich items tend to be more expensive.")
-    md.append(f"- See the scatter plot: ![Price vs Protein](price_vs_protein.png)")
+    md.append("![Price vs Protein](price_vs_protein.png)")
     md.append("")
-    
-    md.append("### Value for Money")
-    md.append(f"- The best value item is **{stats['best_value_item']}** at €{stats['best_value_price_per_100kcal']:.2f} per 100 kcal.")
-    md.append(f"- Base items generally offer better value than combo meals in terms of price per calorie.")
-    md.append(f"- However, combo meals provide a complete meal experience with sides and drinks.")
-    md.append("")
-    
-    # Methodology
-    md.append("## Methodology")
-    md.append("")
-    md.append("### Data Collection")
-    md.append("1. **Menu extraction:** OCR (EasyOCR) was used to extract text from the Hesburger PDF menu")
-    md.append("2. **Price parsing:** Regular expressions parsed item names and prices from the extracted text")
-    md.append("3. **Nutritional data:** Web scraping from the official Hesburger nutritional information page")
-    md.append("4. **Data matching:** Item names were normalized and matched between price and nutrition datasets")
-    md.append("5. **Combo calculations:** Combo meal nutrition was calculated by adding base item + fries + drink")
-    md.append("")
-    
-    md.append("### Analysis Tools")
-    md.append("- **Python 3** with pandas for data processing")
-    md.append("- **Matplotlib** for data visualizations")
-    md.append("- **EasyOCR** for PDF text extraction")
-    md.append("- **BeautifulSoup** for web scraping")
-    md.append("")
-    
-    md.append("---")
-    md.append(f"\n*Report generated by analysis.py on {datetime.now().strftime('%Y-%m-%d at %H:%M:%S')}*")
+    md.append("---\n")
     
     # Write to file
     output_file = output_dir / "analysis_summary.md"
