@@ -40,6 +40,7 @@ pip install pandas numpy matplotlib requests beautifulsoup4 easyocr pymupdf pill
    source venv/bin/activate  # On Linux/Mac
    # or
    venv\Scripts\activate  # On Windows
+   # or you can use Conda like we did in lectures, venv was just preinstalled for me
    ```
 3. Install required packages:
    ```bash
@@ -78,7 +79,7 @@ The script will:
 | Mėsainis | large_combo | 4.15 | 924 | 18.9 | 222.65 |
 | Mėsainis Su sūriu | large_combo | 4.35 | 966 | 21.4 | 222.07 |
 | Mėsainis | base | 1.55 | 340 | 14.6 | 219.35 |
-| Mėsainis Su sūriu | base | 1.75 | 382,21 | 17.1 | 218.40 |
+| Mėsainis Su sūriu | base | 1.75 | 382 | 17.1 | 218.40 |
 
 ### Top 10 Best Deals by Protein per Euro
 
