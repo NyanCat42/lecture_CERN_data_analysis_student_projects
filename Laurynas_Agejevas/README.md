@@ -11,6 +11,7 @@ This project analyzes the Hesburger menu to find the best value deals based on n
 - **Data Matching**: Intelligently matches menu items with their nutritional data
 - **Value Analysis**: Calculates calories per euro and protein per euro for each item
 - **Visualization**: Generates comprehensive plots showing the relationship between price and nutritional content
+- **Assumptions**: Assumes, that you selected Coca-cola as the drink for your combo.
 
 ## Requirements
 
@@ -77,7 +78,7 @@ The script will:
 | Mėsainis | large_combo | 4.15 | 924 | 18.9 | 222.65 |
 | Mėsainis Su sūriu | large_combo | 4.35 | 966 | 21.4 | 222.07 |
 | Mėsainis | base | 1.55 | 340 | 14.6 | 219.35 |
-| Mėsainis Su sūriu | base | 1.75 | | 382,21 | 17.1 | 218.40 |
+| Mėsainis Su sūriu | base | 1.75 | 382,21 | 17.1 | 218.40 |
 
 ### Top 10 Best Deals by Protein per Euro
 
